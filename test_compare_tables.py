@@ -1,7 +1,11 @@
+from unittest import result
 import numpy as np
 import pandas as pd
-import pytest
-from compare_tables import compare_strictly, compare_with_tolerence
+from compare_tables import (
+    compare_strictly,
+    compare_with_tolerence,
+    get_comparison_report,
+)
 
 
 def test_compare_strict_identical_tables(simple_dataframe):
@@ -167,4 +171,41 @@ def test_compare_with_tolerance_float_difference(simple_dataframe):
         simple_dataframe, second_df, absolute_tolerance=0.1, relative_tolerance=0
     )
     assert isinstance(result, pd.DataFrame)
+    pd.testing.assert_frame_equal(result, expected)
+
+
+def test_get_comparison_report_when_no_differences():
+    difference_mask = pd.DataFrame(
+        np.zeros((4, 3)), columns=["A", "B", "C"], dtype=np.dtype("bool")
+    )
+    column_types = pd.Series([int, str, float])
+    expected = pd.DataFrame(
+        data={
+            "Column Name": ["A", "B", "C"],
+            "Column Type": column_types.values,
+            r"% of difference": np.zeros(3),
+        }
+    )
+
+    result = get_comparison_report(difference_mask, column_types)
+
+    pd.testing.assert_frame_equal(result, expected)
+
+
+def test_get_comparison_report_when_a_column_quarter_different():
+    difference_mask = pd.DataFrame(
+        np.zeros((4, 3)), columns=["A", "B", "C"], dtype=np.dtype("bool")
+    )
+    difference_mask.iloc[1, 2] = True
+    column_types = pd.Series([int, str, float])
+    expected = pd.DataFrame(
+        data={
+            "Column Name": ["A", "B", "C"],
+            "Column Type": column_types.values,
+            r"% of difference": [0.0, 0.0, 0.25],
+        }
+    )
+
+    result = get_comparison_report(difference_mask, column_types)
+
     pd.testing.assert_frame_equal(result, expected)

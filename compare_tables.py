@@ -54,3 +54,15 @@ def format_differences(first_df, second_df, diff_mask):
     return pd.DataFrame(
         {"from": changed_from, "to": changed_to}, index=changed_only.index
     )
+
+
+def get_comparison_report(
+    diff_mask: pd.DataFrame, column_types: pd.Series
+) -> pd.DataFrame:
+    return pd.DataFrame(
+        data={
+            "Column Name": diff_mask.columns.values,
+            "Column Type": column_types,
+            r"% of difference": (diff_mask.sum(axis=0) / diff_mask.shape[0]).values,
+        }
+    )
