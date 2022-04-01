@@ -2,7 +2,7 @@ import re
 import pandas as pd
 
 
-class ChechTablesStructure:
+class TablesStructureChecker:
     @staticmethod
     def is_same_dtypes(first_df: pd.DataFrame, second_df: pd.DataFrame):
         first_df = first_df.convert_dtypes()
