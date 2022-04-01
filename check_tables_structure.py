@@ -12,3 +12,7 @@ class ChechTablesStructure:
     @staticmethod
     def is_same_columns(first_df: pd.DataFrame, second_df: pd.DataFrame):
         return first_df.columns.equals(second_df.columns)
+
+    @staticmethod
+    def is_same_index(first_df: pd.DataFrame, second_df: pd.DataFrame):
+        return first_df.index.equals(second_df.index)
