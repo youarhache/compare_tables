@@ -1,7 +1,8 @@
 import pytest
 import numpy as np
 import pandas as pd
-from compare_tables import compare_dataframes, is_same_dtypes
+from compare_tables import compare_dataframes
+from check_tables_structure import ChechTablesStructure
 
 
 @pytest.fixture()
@@ -93,7 +94,7 @@ def test_compare_strict_float_difference(simple_dataframe):
 def test_check_dataframes_types_when_equal(simple_dataframe):
     second_df = simple_dataframe.copy()
 
-    result = is_same_dtypes(simple_dataframe, second_df)
+    result = ChechTablesStructure.is_same_dtypes(simple_dataframe, second_df)
 
     assert result is True
 
@@ -102,6 +103,19 @@ def test_check_dataframes_types_when_infered_types_equal(simple_dataframe):
     second_df = simple_dataframe.copy()
     second_df.astype(np.dtype("O"))
 
-    result = is_same_dtypes(simple_dataframe, second_df)
+    result = ChechTablesStructure.is_same_dtypes(simple_dataframe, second_df)
 
     assert result is True
+
+
+def test_check_dataframes_types_when_infered_types_different(simple_dataframe):
+    second_df = pd.DataFrame(
+        {
+            "int_column": pd.Series([11, 22, 33], dtype=np.dtype("O")),
+            "str_column": pd.Series(["aa", "bb", "ccc"], dtype=np.dtype("str")),
+            "float_column": pd.Series(["1.1", "2.2", "3.3"], dtype=np.dtype("str")),
+        }
+    )
+
+    result = ChechTablesStructure.is_same_dtypes(simple_dataframe, second_df)
+    assert result is False
