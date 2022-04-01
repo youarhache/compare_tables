@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 import pandas as pd
-from compare_tables import compare_dataframes
+from compare_tables import compare_dataframes, is_same_dtypes
 
 
 @pytest.fixture()
@@ -88,3 +88,20 @@ def test_compare_strict_float_difference(simple_dataframe):
     result = compare_dataframes(simple_dataframe, second_df)
     assert isinstance(result, pd.DataFrame)
     pd.testing.assert_frame_equal(result, expected)
+
+
+def test_check_dataframes_types_when_equal(simple_dataframe):
+    second_df = simple_dataframe.copy()
+
+    result = is_same_dtypes(simple_dataframe, second_df)
+
+    assert result is True
+
+
+def test_check_dataframes_types_when_infered_types_equal(simple_dataframe):
+    second_df = simple_dataframe.copy()
+    second_df.astype(np.dtype("O"))
+
+    result = is_same_dtypes(simple_dataframe, second_df)
+
+    assert result is True
