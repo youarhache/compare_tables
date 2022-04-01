@@ -47,9 +47,7 @@ def test_compare_strict_int_difference(simple_dataframe):
 
     result = compare_dataframes(simple_dataframe, second_df)
     assert isinstance(result, pd.DataFrame)
-    assert result.index == expected.index
-    assert (result.values == expected.values).all()
-    assert result.equals(expected)
+    pd.testing.assert_frame_equal(result, expected)
 
 
 def test_compare_strict_str_difference(simple_dataframe):
@@ -69,7 +67,7 @@ def test_compare_strict_str_difference(simple_dataframe):
 
     result = compare_dataframes(simple_dataframe, second_df)
     assert isinstance(result, pd.DataFrame)
-    assert result.equals(expected)
+    pd.testing.assert_frame_equal(result, expected)
 
 
 def test_compare_strict_float_difference(simple_dataframe):
@@ -89,4 +87,4 @@ def test_compare_strict_float_difference(simple_dataframe):
 
     result = compare_dataframes(simple_dataframe, second_df)
     assert isinstance(result, pd.DataFrame)
-    assert result.equals(expected)
+    pd.testing.assert_frame_equal(result, expected)
