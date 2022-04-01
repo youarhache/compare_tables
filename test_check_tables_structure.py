@@ -57,3 +57,29 @@ def test_check_tables_columns_when_missing_column_in_second(simple_dataframe):
     result = ChechTablesStructure.is_same_columns(simple_dataframe, second_df)
 
     assert result is False
+
+
+def test_check_tables_indexes_when_same(simple_dataframe):
+    second_df = simple_dataframe.copy()
+
+    result = ChechTablesStructure.is_same_index(simple_dataframe, second_df)
+
+    assert result is True
+
+
+def test_check_tables_indexes_when_different_values(simple_dataframe):
+    second_df = simple_dataframe.copy()
+    second_df.set_index(pd.Index([5, 6, 7]), inplace=True)
+
+    result = ChechTablesStructure.is_same_index(simple_dataframe, second_df)
+
+    assert result is False
+
+
+def test_check_tables_indexes_when_different_types(simple_dataframe):
+    second_df = simple_dataframe.copy()
+    second_df.set_index(pd.Index(["1", "2", "3"]), inplace=True)
+
+    result = ChechTablesStructure.is_same_index(simple_dataframe, second_df)
+
+    assert result is False
