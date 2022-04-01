@@ -1,3 +1,4 @@
+from unittest import result
 import pytest
 import numpy as np
 import pandas as pd
@@ -118,4 +119,30 @@ def test_check_dataframes_types_when_infered_types_different(simple_dataframe):
     )
 
     result = ChechTablesStructure.is_same_dtypes(simple_dataframe, second_df)
+
+    assert result is False
+
+
+def test_check_dataframes_columns_when_equal(simple_dataframe):
+    second_df = simple_dataframe.copy()
+
+    result = ChechTablesStructure.is_same_columns(simple_dataframe, second_df)
+
+    assert result is True
+
+
+def test_check_dataframes_columns_when_missing_column_in_first(simple_dataframe):
+    second_df = simple_dataframe.copy()
+    second_df["new_column"] = np.nan
+
+    result = ChechTablesStructure.is_same_columns(simple_dataframe, second_df)
+
+    assert result is False
+
+
+def test_check_dataframes_columns_when_missing_column_in_second(simple_dataframe):
+    second_df = simple_dataframe.drop(columns=["float_column"])
+
+    result = ChechTablesStructure.is_same_columns(simple_dataframe, second_df)
+
     assert result is False
