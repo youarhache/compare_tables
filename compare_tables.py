@@ -1,10 +1,9 @@
 from typing import Optional, List
-from matplotlib.font_manager import findSystemFonts
 import pandas as pd
 import numpy as np
 
 
-def compare_dataframes(
+def compare_strictly(
     first_df: pd.DataFrame, second_df: pd.DataFrame
 ) -> Optional[pd.DataFrame]:
     if first_df.equals(second_df):
@@ -15,15 +14,33 @@ def compare_dataframes(
 
 
 def compare_with_tolerence(
-    first_df: pd.DataFrame, second_df: pd.DataFrame, tolerances: List[float]
+    first_df: pd.DataFrame,
+    second_df: pd.DataFrame,
+    absolute_tolerance: float = 0,
+    relative_tolerance: float = 0,
 ) -> Optional[pd.DataFrame]:
     if first_df.equals(second_df):
         return None
-    assert is_values_numeric(first_df) and is_values_numeric(second_df)
     diff_mask = pd.DataFrame()
-    for column in first_df.columns:
-        diff_mask[column] = first_df.loc[:, column].isclose(second_df.loc[:, column])
-    differences = format_differences(first_df, second_df, diff_mask)
+    non_numeric = first_df.select_dtypes([int, float])
+    non_numeric_columns = [c for c in first_df.columns if c not in non_numeric]
+    for column in non_numeric:
+        diff_mask[column] = ~np.isclose(
+            first_df.loc[:, column],
+            second_df.loc[:, column],
+            rtol=relative_tolerance,
+            atol=absolute_tolerance,
+            equal_nan=True,
+        )
+    diff_mask[non_numeric_columns] = (
+        first_df.loc[:, non_numeric_columns] != second_df.loc[:, non_numeric_columns]
+    ) & ~(
+        first_df.loc[:, non_numeric_columns].isnull()
+        & second_df.loc[:, non_numeric_columns].isnull()
+    )
+    differences = format_differences(
+        first_df, second_df, diff_mask.loc[:, first_df.columns]
+    )
     return differences
 
 
