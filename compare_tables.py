@@ -1,18 +1,25 @@
 from typing import Optional, List
 import pandas as pd
 import numpy as np
+from tables_structure_checker import check_tables_structure
 
 
+@check_tables_structure
 def compare_strictly(
     first_df: pd.DataFrame, second_df: pd.DataFrame
 ) -> Optional[pd.DataFrame]:
     if first_df.equals(second_df):
-        return None
-    diff_mask = (first_df != second_df) & ~(first_df.isnull() & second_df.isnull())
-    differences = format_differences(first_df, second_df, diff_mask)
-    return differences
+        return pd.DataFrame(
+            data=np.zeros(first_df.shape),
+            columns=first_df.columns,
+            index=first_df.index,
+            dtype=bool,
+        )
+    diff_mask = _get_strict_differences_locations(first_df, second_df)
+    return diff_mask
 
 
+@check_tables_structure
 def compare_with_tolerence(
     first_df: pd.DataFrame,
     second_df: pd.DataFrame,
@@ -20,11 +27,17 @@ def compare_with_tolerence(
     relative_tolerance: float = 0,
 ) -> Optional[pd.DataFrame]:
     if first_df.equals(second_df):
-        return None
+        return pd.DataFrame(
+            data=np.zeros(first_df.shape),
+            columns=first_df.columns,
+            index=first_df.index,
+            dtype=bool,
+        )
     diff_mask = pd.DataFrame()
     non_numeric = first_df.select_dtypes([int, float])
     non_numeric_columns = [c for c in first_df.columns if c not in non_numeric]
     for column in non_numeric:
+        # return location where numerical values are not close to each other
         diff_mask[column] = ~np.isclose(
             first_df.loc[:, column],
             second_df.loc[:, column],
@@ -32,19 +45,21 @@ def compare_with_tolerence(
             atol=absolute_tolerance,
             equal_nan=True,
         )
-    diff_mask[non_numeric_columns] = (
-        first_df.loc[:, non_numeric_columns] != second_df.loc[:, non_numeric_columns]
-    ) & ~(
-        first_df.loc[:, non_numeric_columns].isnull()
-        & second_df.loc[:, non_numeric_columns].isnull()
+    diff_mask[non_numeric_columns] = _get_strict_differences_locations(
+        first_df.loc[:, non_numeric_columns], second_df.loc[:, non_numeric_columns]
     )
-    differences = format_differences(
-        first_df, second_df, diff_mask.loc[:, first_df.columns]
-    )
-    return differences
+    return diff_mask.loc[:, first_df.columns]
 
 
-def format_differences(first_df, second_df, diff_mask):
+def _get_strict_differences_locations(
+    first_df: pd.DataFrame, second_df: pd.DataFrame
+) -> pd.DataFrame:
+    return (first_df != second_df) & ~(first_df.isnull() & second_df.isnull())
+
+
+def get_formatted_different_values(
+    first_df: pd.DataFrame, second_df: pd.DataFrame, diff_mask: pd.DataFrame
+) -> pd.DataFrame:
     diff_locations = np.where(diff_mask)
     changed_from = first_df.values[diff_locations]
     changed_to = second_df.values[diff_locations]
@@ -56,7 +71,7 @@ def format_differences(first_df, second_df, diff_mask):
     )
 
 
-def get_comparison_report(
+def get_column_difference_percentages(
     diff_mask: pd.DataFrame, column_types: pd.Series
 ) -> pd.DataFrame:
     return pd.DataFrame(
