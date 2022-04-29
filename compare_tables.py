@@ -76,8 +76,31 @@ def get_column_difference_percentages(
 ) -> pd.DataFrame:
     return pd.DataFrame(
         data={
-            "Column Name": diff_mask.columns.values,
-            "Column Type": column_types,
-            r"% of difference": (diff_mask.sum(axis=0) / diff_mask.shape[0]).values,
+            "Column name": diff_mask.columns.values,
+            "Column type": column_types,
+            r"% of difference": 100
+            * (diff_mask.sum(axis=0) / diff_mask.shape[0]).values,
         }
     )
+
+
+def get_number_differenes_per_row(
+    diff_mask: pd.DataFrame, limit: int = 5
+) -> pd.DataFrame:
+    output_column_name = "Number of differences"
+    number_of_row_diffs = pd.DataFrame(
+        data={output_column_name: diff_mask.sum(axis=1).sort_values(ascending=False)}
+    )
+    return number_of_row_diffs.nlargest(limit, output_column_name, keep="first")
+
+
+def get_most_common_different_values_per_column(
+    formatted_differences: pd.DataFrame, limit: int = 5
+) -> pd.DataFrame:
+    differences = formatted_differences.copy().reset_index()
+    df_agg = (
+        differences.groupby(["column", "from", "to"], as_index=True, dropna=False)
+        .agg({"id": "nunique"})
+        .rename(columns={"id": "count"})
+    )
+    return df_agg.nlargest(limit, columns="count", keep="first")
