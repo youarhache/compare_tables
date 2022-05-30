@@ -24,18 +24,19 @@ def is_same_columns(first_table: pd.DataFrame, second_table: pd.DataFrame):
 
 
 def is_same_index(first_table: pd.DataFrame, second_table: pd.DataFrame):
-    return first_table.index.equals(second_table.index)
+    # return first_table.index.equals(second_table.index)
+    return set(first_table.index) == set(second_table.index)
 
 
 def run_checks(first_table: pd.DataFrame, second_table: pd.DataFrame) -> bool:
-    if not is_same_dtypes(first_table, second_table):
-        raise DifferentColumnTypesError(
-            f"The tables have different column types: \nfirst table:\n{first_table.dtypes.to_dict()}\n\nsecond table:\n{second_table.dtypes.to_dict()}"
-        )
-
     if not is_same_columns(first_table, second_table):
         raise DifferentColumnsError(
             f"The tables have different columns: \nfirst table:\n{first_table.columns.to_dict()}\n\nsecond table:\n{second_table.columns.to_dict()}"
+        )
+
+    if not is_same_dtypes(first_table, second_table):
+        raise DifferentColumnTypesError(
+            f"The tables have different column types: \nfirst table:\n{first_table.dtypes.to_dict()}\n\nsecond table:\n{second_table.dtypes.to_dict()}"
         )
 
     if not is_same_index(first_table, second_table):
