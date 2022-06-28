@@ -1,4 +1,4 @@
-name: Compare tables
+name: auto-testing
 
 on: [push]
 
