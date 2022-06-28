@@ -24,7 +24,6 @@ def is_same_columns(first_table: pd.DataFrame, second_table: pd.DataFrame):
 
 
 def is_same_index(first_table: pd.DataFrame, second_table: pd.DataFrame):
-    # return first_table.index.equals(second_table.index)
     return set(first_table.index) == set(second_table.index)
 
 
